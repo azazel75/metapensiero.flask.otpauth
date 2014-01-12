@@ -1,0 +1,5 @@
+*.autosave
+*.egg-info
+*.py[co]
+*.egg
+*.egg-info

@@ -35,9 +35,12 @@ setup(name='metapensiero.flask.otpauth',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          # -*- Extra requirements: -*-
+          'flask',
+          'pastedeploy',
+          'pastescript'
       ],
       entry_points="""
-      # -*- Entry points: -*-
+      [paste.app_factory]
+      main = metapensiero.flask.otpauth.app:app_factory
       """,
       )

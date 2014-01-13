@@ -10,7 +10,7 @@ import urllib
 import urllib2
 from flask import Flask, request, Response, json, session, after_this_request
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('otpauth')
 
 def checkAuth(config, username, password):
     """This function is called to check if a username /
@@ -54,7 +54,6 @@ def fillSession(session, request, client_ip):
     session['client_ip'] = client_ip
 
 
-
 def inc_session():
     c = session.setdefault('counter', 0)
     session['counter'] = c + 1
@@ -87,20 +86,19 @@ application = Flask(__name__)
 @application.route('/login')
 def login():
     auth = request.authorization
-    req_data = getUpstreamReqData(app, request)
-    logger.debug
+    req_data = getUpstreamReqData(application, request)
+    logger.debug('Client IP: %s, method: %s, realm: %s', req_data['client_ip'],
+                 req_data['method'], req_data['realm'])
     if req_data['method'] not in ['GET', 'HEAD']:
         if not 'counter' in session:
             print "session not present"
-            if not auth or not check_auth(application.config, auth.username,
-                                          auth.password):
+            if not auth or not checkAuth(application.config, auth.username,
+                                         auth.password):
                 return authenticate()
             else:
                 inc_session()
         else:
             inc_session()
-    else:
-        print "request is GET"
     return 'OK'
 
 
@@ -113,10 +111,8 @@ def app_factory(global_conf, **local_conf):
     parser = ConfigParser()
     parser.read(config_file)
     if parser.has_section('loggers'):
-        return fileConfig(
-            config_file,
-            dict(__file__=config_file, here=os.path.dirname(config_file))
-            )
+        fileConfig(config_file,
+                   dict(__file__=config_file, here=os.path.dirname(config_file)))
 
     return application.wsgi_app
 
